@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 # 目标网站的URL
 url = 'http://basic.10jqka.com.cn/688311/'
 
-# 模拟浏览器的User-Agent，这里使用的是Chrome浏览器的示例UA，你可以根据需要替换为其他浏览器的UA
+# 模拟浏览器的User-Agent
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
@@ -20,35 +20,49 @@ if response.status_code == 200:
     soup = BeautifulSoup(response.text, 'html.parser')
     print(soup)
 
+    # 解析股票名
+    stock_name = soup.find('h1', string=lambda text: text and text.strip()).get_text(strip=True)
+    # 解析股票代码
+    stock_code = soup.find('h1', string=lambda text: text and text.strip().isdigit()).get_text(strip=True)
+    # 解析市值
+    total_market_value_tag = soup.find(string="总市值：")
+    if total_market_value_tag:
+        total_market_value = total_market_value_tag.find_next(class_="tip f12").text.strip()
+    else:
+        total_market_value = "没找到总市值"
     # 解析市盈率(静态)
     pe_ratio_static = soup.find(id="jtsyl").text
-
-    # 解析总市值
-    total_revenue_element = soup.find(string="总市值：")
+    # 解析分红率 todo
+    dividend_rate = soup.find(id="jtsyl").text
+    # 解析员工人数 todo
+    number_of_employees = soup.find(id="jtsyl").text
+    # 解析股价
+    stock_price = None
+    # 解析每股收益
+    earnings_per_share_tag = soup.find(string="每股收益：")
+    if earnings_per_share_tag:
+        earnings_per_share = earnings_per_share_tag.find_next(class_="tip f12").text.strip()
+    else:
+        earnings_per_share = "没找到每股收益"
+    # 解析每股净资产
+    net_asset_per_share = soup.find(id="jtsyl").text
+    # 解析营业总收入
+    total_revenue_element = soup.find(string="营业总收入：")
     if total_revenue_element:
         total_revenue = total_revenue_element.find_next(class_="tip f12").text.strip()
     else:
-        total_revenue = "未找到"
-
-    # 解析每股未分配利润
-    undistributed_profit_per_share_element = soup.find(string=lambda text: text and "每股未分配利润：" in text)
-    if undistributed_profit_per_share_element:
-        undistributed_profit_per_share = undistributed_profit_per_share_element.find_next(class_="tip f12").text
-    else:
-        undistributed_profit_per_share = "未找到"
-
-    # 解析总股本
-    total_share_capital_element = soup.find(string=lambda text: text and "总股本：" in text)
-    if total_share_capital_element:
-        total_share_capital = total_share_capital_element.find_next(class_="tip f12").text
-    else:
-        total_share_capital = "未找到"
+        total_revenue = "未找到营业总收入"
+    # 解析公司亮点
+    company_highlight = soup.find(id="jtsyl").text
+    # 解析主营业务
+    main_business = soup.find(id="jtsyl").text
 
     # 打印结果
-    print(f"市盈率(静态): {pe_ratio_static}")
-    print(f"总市值: {total_revenue}")
-    print(f"每股未分配利润（假设为净利润）: {undistributed_profit_per_share}")
-    print(f"总股本: {total_share_capital}")
+    print(f"{stock_name}")
+    print(f"{stock_code}")
+    print(f"{total_market_value}")
+    print(f"{pe_ratio_static}")
+    print(f"{earnings_per_share}")
 
 else:
     print(f"Error fetching page: HTTP {response.status_code}")
