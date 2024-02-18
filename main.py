@@ -98,7 +98,7 @@ def main():
     # 初始化url_lists列表，包含多个urls列表，[上交所A股列表, 上交所科创板股票列表, 深交所股票列表]
     url_lists = init_data()
 
-    # 只保留一个excel
+    # 只保留一个Workbook实例
     wb = Workbook()
     ws = wb.active
     ws.append(
@@ -107,6 +107,7 @@ def main():
 
     # 记录程序开始时间
     start_time = time.time()
+
     for index, url_list in enumerate(url_lists):
         # 遍历url爬取网站
         for url in url_list:
@@ -120,13 +121,14 @@ def main():
             html = scraper.fetch_data()
             if html:
                 data = scraper.parse_data(html)
-                scraper.save_to_excel(data, f"stock_data{index + 1}.xlsx", ws, wb)
+                scraper.save_to_excel(data, f"stock_data.xlsx", ws, wb)
 
     # 记录程序结束时间
     end_time = time.time()
     # 计算程序执行时间
     execution_time = end_time - start_time
-    print(f"程序执行时间为: {execution_time} 秒")
+    print(f"程序爬取时间为: {execution_time} 秒")
+
 
 def init_data():
     # 加载 Excel 文件, 两个文件得用不同excel处理库, 不然会报错
