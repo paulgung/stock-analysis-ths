@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Python
+*.pyc
+__pycache__/
+
+# Virtual Environment
+venv/
+env/
+env_bak/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+ehthumbs.db
+Thumbs.db
