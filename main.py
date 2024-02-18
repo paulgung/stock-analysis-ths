@@ -111,17 +111,21 @@ def main():
     for index, url_list in enumerate(url_lists):
         # 遍历url爬取网站
         for url in url_list:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-            }
-            print("开始爬取url:", url)
-            # 一个爬虫示例
-            scraper = StockDataScraper(url, headers)
-            # 爬虫返回的原始数据
-            html = scraper.fetch_data()
-            if html:
-                data = scraper.parse_data(html)
-                scraper.save_to_excel(data, f"stock_data.xlsx", ws, wb)
+            try:
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                }
+                print("开始爬取url:", url)
+                # 一个爬虫示例
+                scraper = StockDataScraper(url, headers)
+                # 爬虫返回的原始数据
+                html = scraper.fetch_data()
+                if html:
+                    data = scraper.parse_data(html)
+                    scraper.save_to_excel(data, f"stock_data.xlsx", ws, wb)
+            except Exception as e:
+                # 处理所有异常的代码
+                print(f"数据爬取发生异常：{e}")
 
     # 记录程序结束时间
     end_time = time.time()
