@@ -131,7 +131,7 @@ def main():
     end_time = time.time()
     # 计算程序执行时间
     execution_time = end_time - start_time
-    print(f"程序爬取时间为: {execution_time} 秒")
+    print(f"程序爬取完成！共耗时: {execution_time} 秒")
 
 
 def init_data():
