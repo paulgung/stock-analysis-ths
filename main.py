@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import re
+import time
 
 
 class StockDataScraper:
@@ -88,32 +89,44 @@ class StockDataScraper:
                          }
         return translate_map
 
-    def extract_text(self, element):
-        return element.get_text(strip=True) if element else "未找到"
-
-    def save_to_excel(self, data, ws, wb):
-        # ws.append(list(data.keys()))
+    def save_to_excel(self, data, filename, ws, wb):
         ws.append(list(data.values()))
-        wb.save("stock_data.xlsx")
+        wb.save(filename)
 
 
 def main():
-    # 初始化urls列表
-    shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_AK_urls = init_data()
+    # 初始化url_lists列表，包含多个urls列表，[上交所A股列表, 上交所科创板股票列表, 深交所股票列表]
+    url_lists = init_data()
+
     # 只保留一个excel
     wb = Workbook()
     ws = wb.active
-    # 遍历url爬取网站
-    for url in shang_jiao_A_urls[:20]:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-        }
-        print("开始爬取url:", url)
-        scraper = StockDataScraper(url, headers)
-        html = scraper.fetch_data()
-        if html:
-            data = scraper.parse_data(html)
-            scraper.save_to_excel(data, ws, wb)
+    ws.append(
+        ['股票名', '股票代码', '市值', '市盈率', '分红率', '员工人数', '股价', '每股收益', '每股净资产', '营业总收入',
+         '公司亮点', '主营业务'])
+
+    # 记录程序开始时间
+    start_time = time.time()
+    for index, url_list in enumerate(url_lists):
+        # 遍历url爬取网站
+        for url in url_list:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+            }
+            print("开始爬取url:", url)
+            # 一个爬虫示例
+            scraper = StockDataScraper(url, headers)
+            # 爬虫返回的原始数据
+            html = scraper.fetch_data()
+            if html:
+                data = scraper.parse_data(html)
+                scraper.save_to_excel(data, f"stock_data{index + 1}.xlsx", ws, wb)
+
+    # 记录程序结束时间
+    end_time = time.time()
+    # 计算程序执行时间
+    execution_time = end_time - start_time
+    print(f"程序执行时间为: {execution_time} 秒")
 
 def init_data():
     # 加载 Excel 文件, 两个文件得用不同excel处理库, 不然会报错
@@ -152,7 +165,8 @@ def init_data():
     shen_jiao_AK_urls = [url_template.format(code) for code in shen_jiao_AK_stocks]
 
     # 返回上交所A股、上交所科创板、深交所A股和科创板
-    return shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_AK_urls
+    return [shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_AK_urls]
+
 
 if __name__ == "__main__":
     main()
