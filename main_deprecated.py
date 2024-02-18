@@ -102,7 +102,7 @@ if response.status_code == 200:
     # 加载 Excel 文件
     wb1 = xlrd.open_workbook('stock_data/上交所主板A股.xlsx')
     wb2 = xlrd.open_workbook('stock_data/上交所科创板.xlsx')
-    wb3 = load_workbook('stock_data/深交所A股列表.xlsx')
+    wb3 = load_workbook('stock_data/深交所A股科创股列表.xlsx')
 
     # 获取第一个工作表
     ws1 = wb1.sheet_by_index(0)

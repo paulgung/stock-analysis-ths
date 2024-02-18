@@ -99,7 +99,7 @@ class StockDataScraper:
 
 def main():
     # 初始化urls列表
-    shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_A_urls = init_data()
+    shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_AK_urls = init_data()
     # 只保留一个excel
     wb = Workbook()
     ws = wb.active
@@ -116,20 +116,20 @@ def main():
             scraper.save_to_excel(data, ws, wb)
 
 def init_data():
-    # 加载 Excel 文件
+    # 加载 Excel 文件, 两个文件得用不同excel处理库, 不然会报错
     wb_shangjiao_A = xlrd.open_workbook('stock_data/上交所主板A股.xlsx')
     wb_shangjiao_K = xlrd.open_workbook('stock_data/上交所科创板.xlsx')
-    wb_shenjiao_A = load_workbook('stock_data/深交所A股列表.xlsx')
+    wb_shenjiao_AK = load_workbook('stock_data/深交所A股科创股列表.xlsx')
 
     # 获取第一个工作表
     ws_shangjiao_A = wb_shangjiao_A.sheet_by_index(0)
     ws_shangjiao_K = wb_shangjiao_K.sheet_by_index(0)
-    ws_shenjiao_A = wb_shenjiao_A.active
+    ws_shenjiao_AK = wb_shenjiao_AK.active
 
     # 创建一个空列表用于存储第一列内容
     shang_jiao_A_stocks = []
     shang_jiao_K_stocks = []
-    shen_jiao_A_stocks = []
+    shen_jiao_AK_stocks = []
 
     # 遍历第一列的单元格（从第二行开始），并将其值添加到列表中
     for row_index in range(1, ws_shangjiao_A.nrows):
@@ -142,17 +142,17 @@ def init_data():
         shang_jiao_K_stocks.append(cell_value)
 
     # 遍历第五列的单元格（从第二行开始），并将其值添加到列表中
-    for row in ws_shenjiao_A.iter_rows(min_row=2, min_col=5, max_col=5, values_only=True):
-        shen_jiao_A_stocks.append(row[0])
+    for row in ws_shenjiao_AK.iter_rows(min_row=2, min_col=5, max_col=5, values_only=True):
+        shen_jiao_AK_stocks.append(row[0])
 
     # 使用列表推导式生成url列表
     url_template = 'https://basic.10jqka.com.cn/{}/'
-
     shang_jiao_A_urls = [url_template.format(code) for code in shang_jiao_A_stocks]
     shang_jiao_K_urls = [url_template.format(code) for code in shang_jiao_K_stocks]
-    shen_jiao_A_urls = [url_template.format(code) for code in shen_jiao_A_stocks]
+    shen_jiao_AK_urls = [url_template.format(code) for code in shen_jiao_AK_stocks]
 
-    return shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_A_urls
+    # 返回上交所A股、上交所科创板、深交所A股和科创板
+    return shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_AK_urls
 
 if __name__ == "__main__":
     main()
