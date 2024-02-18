@@ -10,48 +10,7 @@ class StockDataScraper:
     def __init__(self, url, headers):
         self.url = url
         self.headers = headers
-        self.init_data()
-        self.shang_jiao_A_stocks = None
-        self.shang_jiao_K_stocks = None
-        self.shen_jiao_A_stocks = None
 
-    def init_data(self):
-        # 加载 Excel 文件
-        wb1 = xlrd.open_workbook('stock_data/上交所主板A股.xlsx')
-        wb2 = xlrd.open_workbook('stock_data/上交所科创板.xlsx')
-        wb3 = load_workbook('stock_data/深交所A股列表.xlsx')
-
-        # 获取第一个工作表
-        ws1 = wb1.sheet_by_index(0)
-        ws2 = wb2.sheet_by_index(0)
-        ws3 = wb3.active
-
-        # 创建一个空列表用于存储第一列内容
-        shang_jiao_A_stocks = []
-        shang_jiao_K_stocks = []
-        shen_jiao_A_stocks = []
-
-        # 遍历第一列的单元格（从第二行开始），并将其值添加到列表中
-        for row_index in range(1, ws1.nrows):
-            cell_value = ws1.cell_value(row_index, 0)  # 第一列索引为0
-            shang_jiao_A_stocks.append(cell_value)
-
-        # 遍历第一列的单元格（从第二行开始），并将其值添加到列表中
-        for row_index in range(1, ws2.nrows):
-            cell_value = ws2.cell_value(row_index, 0)  # 第一列索引为0
-            shang_jiao_K_stocks.append(cell_value)
-
-        # 遍历第五列的单元格（从第二行开始），并将其值添加到列表中
-        for row in ws3.iter_rows(min_row=2, min_col=5, max_col=5, values_only=True):
-            shen_jiao_A_stocks.append(row[0])
-
-        self.shang_jiao_A_stocks = shang_jiao_A_stocks
-        self.shang_jiao_K_stocks = shang_jiao_K_stocks
-        self.shen_jiao_A_stocks = shen_jiao_A_stocks
-        # 打印列表内容
-        print(self.shang_jiao_A_stocks)
-        print(self.shang_jiao_K_stocks)
-        print(self.shen_jiao_A_stocks)
     def fetch_data(self):
         response = requests.get(self.url, headers=self.headers)
         response.encoding = 'GBK'
@@ -103,19 +62,60 @@ class StockDataScraper:
 
 
 def main():
-    url = 'http://basic.10jqka.com.cn/000002/'
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    }
+    shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_A_urls = init_data()
+    for url in shang_jiao_A_urls:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+        }
 
-    scraper = StockDataScraper(url, headers)
-    html = scraper.fetch_data()
-    if html:
-        data = scraper.parse_data(html)
-        # for variable_name, variable_value in data.items():
-        #     print(f"{variable_name}: {variable_value}")
-        scraper.save_to_excel(data)
+        scraper = StockDataScraper(url, headers)
+        html = scraper.fetch_data()
+        if html:
+            data = scraper.parse_data(html)
+            scraper.save_to_excel(data)
 
+def init_data():
+    # 加载 Excel 文件
+    wb_shangjiao_A = xlrd.open_workbook('stock_data/上交所主板A股.xlsx')
+    wb_shangjiao_K = xlrd.open_workbook('stock_data/上交所科创板.xlsx')
+    wb_shenjiao_A = load_workbook('stock_data/深交所A股列表.xlsx')
+
+    # 获取第一个工作表
+    ws_shangjiao_A = wb_shangjiao_A.sheet_by_index(0)
+    ws_shangjiao_K = wb_shangjiao_K.sheet_by_index(0)
+    ws_shenjiao_A = wb_shenjiao_A.active
+
+    # 创建一个空列表用于存储第一列内容
+    shang_jiao_A_stocks = []
+    shang_jiao_K_stocks = []
+    shen_jiao_A_stocks = []
+
+    # 遍历第一列的单元格（从第二行开始），并将其值添加到列表中
+    for row_index in range(1, ws_shangjiao_A.nrows):
+        cell_value = ws_shangjiao_A.cell_value(row_index, 0)  # 第一列索引为0
+        shang_jiao_A_stocks.append(cell_value)
+
+    # 遍历第一列的单元格（从第二行开始），并将其值添加到列表中
+    for row_index in range(1, ws_shangjiao_K.nrows):
+        cell_value = ws_shangjiao_K.cell_value(row_index, 0)  # 第一列索引为0
+        shang_jiao_K_stocks.append(cell_value)
+
+    # 遍历第五列的单元格（从第二行开始），并将其值添加到列表中
+    for row in ws_shenjiao_A.iter_rows(min_row=2, min_col=5, max_col=5, values_only=True):
+        shen_jiao_A_stocks.append(row[0])
+
+    shang_jiao_A_stocks = shang_jiao_A_stocks
+    shang_jiao_K_stocks = shang_jiao_K_stocks
+    shen_jiao_A_stocks = shen_jiao_A_stocks
+
+    # 使用列表推导式生成url列表
+    url_template = 'https://basic.10jqka.com.cn/{}/'
+
+    shang_jiao_A_urls = [url_template.format(code) for code in shang_jiao_A_stocks]
+    shang_jiao_K_urls = [url_template.format(code) for code in shang_jiao_K_stocks]
+    shen_jiao_A_urls = [url_template.format(code) for code in shen_jiao_A_stocks]
+
+    return shang_jiao_A_urls, shang_jiao_K_urls, shen_jiao_A_urls
 
 if __name__ == "__main__":
     main()
