@@ -60,6 +60,12 @@ class StockDataScraper:
             total_revenue = total_revenue_element.find_next(class_="tip f12").text.strip()
         else:
             total_revenue = "未找到营业总收入"
+        # 解析净利润
+        net_profit_element = soup.find(string="净利润：")
+        if net_profit_element:
+            net_profit = net_profit_element.find_next(class_="tip f12").text.strip()
+        else:
+            net_profit = "没找到净利润"
         # 解析公司亮点
         company_highlight_element = soup.find(string="公司亮点：")
         if company_highlight_element:
@@ -84,6 +90,7 @@ class StockDataScraper:
                          '每股收益': earnings_per_share,
                          '每股净资产': net_asset_per_share,
                          '营业总收入': total_revenue,
+                         '净利润': net_profit,
                          '公司亮点': company_highlight,
                          '主营业务': main_business
                          }
